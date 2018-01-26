@@ -1,0 +1,1 @@
+from src.worker.edgeDetect import edgeDetect

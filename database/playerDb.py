@@ -5,7 +5,7 @@ import configparser
 class playerDb:
     #读取配置文件中的数据
     cf=configparser.ConfigParser()
-    cf.read("database\\mitontteConf.conf","utf-8-sig")
+    cf.read("database/mitontteConf.conf","utf-8-sig")
     databaseName=cf.get("database","databaseName")
     host = cf.get("database","host")
     port = cf.getint("database","port")
@@ -93,7 +93,7 @@ class playerDb:
             conn =playerDb.__connectdb__()
             cursor = conn.cursor()
             sql = '''UPDATE CLUB SET PLAYER_ID='%s',CLUB_ID='%s',BLOCK_HEIGHT='%s',WEIGHT='%s',INTERNATION_COUNT='%s',SPIKE_HEIGHT='%s',TOTAL='%s',LOCAL_COUNT='%s',PHOTO='%s',HEIGHT='%s',BIRTHDAY='%s',ZH_NAME='%s',NUMBER='%s',POSITION='%s'
-                   ''' % (playerDict["id"],playerDict["club_id"],playerDict["block_height"],playerDict["weight"],playerDict["internation_count"],playerDict["spike_height"],
+                   ''' % (playerDict["id"],playerDict["club_team_id"],playerDict["block_height"],playerDict["weight"],playerDict["int_count"],playerDict["spike_height"],
             playerDict["total"],playerDict["local_count"],playerDict["photo"],playerDict["height"],playerDict["birthday"],playerDict["zh_name"],playerDict["number"],playerDict["position"])
             try:
                 cursor.execute(sql)

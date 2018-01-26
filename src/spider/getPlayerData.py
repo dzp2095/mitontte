@@ -6,7 +6,7 @@ from pyquery import PyQuery
 import database
 import urllib
 import http.cookiejar
-class getPlayerDate:
+class getPlayerData:
     header = {
         "User-Agent": "Mozilla/5.0(Windows NT 6.3; Win64;x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/58.0.3029.81 Safari/537.36",
         "Content-Type": "application / x - www - form - urlencoded",
@@ -30,7 +30,7 @@ class getPlayerDate:
     @staticmethod
     def queryPlayer():
         url = "http://www.volleychina.org/team/w/"
-        opener = getPlayerDate.getOpener(getPlayerDate.header)
+        opener = getPlayerData.getOpener(getPlayerData.header)
         op = opener.open(url)
         data=op.read()
         data=PyQuery(data)
@@ -83,3 +83,4 @@ class getPlayerDate:
                 playerDict["position"]=positionToZH(int(playerDict["position"]))
                 res.append(playerDict)
                 database.playerDb.creatPlayer(playerDict)
+                print(playerDict)

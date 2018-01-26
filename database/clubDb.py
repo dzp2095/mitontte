@@ -5,7 +5,7 @@ import configparser
 class clubDb:
     #读取配置文件中的数据
     cf=configparser.ConfigParser()
-    cf.read("database\\mitontteConf.conf","utf-8-sig")
+    cf.read("database/mitontteConf.conf","utf-8-sig")
     databaseName=cf.get("database","databaseName")
     host = cf.get("database","host")
     port = cf.getint("database","port")
