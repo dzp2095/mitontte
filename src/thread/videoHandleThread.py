@@ -26,6 +26,7 @@ class videoHandleThread(QtCore.QThread):
         self.haveGetQuitSignal=False
         self.cap=cv2.VideoCapture(self.filename)
         self.framToChange=-1
+
     def run(self):
         #总帧数
         framCount = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))

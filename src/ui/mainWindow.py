@@ -9,10 +9,12 @@ from PyQt5.QtWidgets import QListWidgetItem
 from src.thread import videoHandleThread
 from src.thread.getPlayerDataThread import getPlayerDataThread
 from src.ui import ui_MainWindow
+from src.ui import framlessWindow
 from PyQt5.QtWidgets import QMessageBox
 from resource.resource import *
-
-class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
+from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint
+class mainWindow(QtWidgets.QMainWindow,framlessWindow.QUnFrameWindow, ui_MainWindow.Ui_MainWindow):
 
     resizeSignal = QtCore.pyqtSignal(QtCore.QSize)
     #标识线程是否继续工作信号(处理暂停操作)
@@ -21,9 +23,10 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
     quitSignal = QtCore.pyqtSignal()
     #改变当前帧
     currentFrameChangeSignal = QtCore.pyqtSignal(int)
-    def __init__(self,parent=None):
 
-        super(mainWindow, self).__init__()
+    def __init__(self,**kwds):
+        super().__init__(**kwds)
+
         self.setupUi(self)
         #self.__center__()
         self.retranslateUi(self)
@@ -35,6 +38,15 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
         self.workThreadHasStart=False
         #标识工作线程是否正在运行
         self.isWorking = False
+
+        self._padding = 5  # 设置边界宽度为5
+        self.initLayout() # 设置框架布局
+        self.initTitleLabel()  # 安放标题栏标签
+        self.setWindowTitle = self._setTitleText(self.setWindowTitle) # 用装饰器将设置WindowTitle名字函数共享到标题栏标签上
+        self.setWindowTitle("mitontte")
+
+        self.setMouseTracking(True) # 设置widget鼠标跟踪
+        self.initDrag() # 设置鼠标跟踪判断默认值
         self.loadQSS()
 
      #加载qss
@@ -132,9 +144,7 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
         self.label_rest_time.setText(currentTime+"/"+self.videoTotalTime)
         self.label_video.setPixmap(frame)
 
-    #变更后的视频播放label的size发给工作线程
-    def resizeEvent(self, *args, **kwargs):
-        self.resizeSignal.emit(self.label_video.size())
+
 
     #得到总帧数
     def onGetFrameCount(self,framCount,videoTotalTime):
@@ -162,3 +172,30 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
             QMessageBox.information(self,"error", "网络错误")
         if finishTag==1:
             QMessageBox.information(self,"ok", "爬虫工作完成")
+
+    #变更后的视频播放label的size发给工作线程
+    def resizeEvent(self, *args, **kwargs):
+        # 自定义窗口调整大小事件
+        self._TitleLabel.setFixedWidth(self.width()) # 将标题标签始终设为窗口宽度
+        # 分别移动三个按钮到正确的位置
+        try:
+            self._CloseButton.move(self.width() - self._CloseButton.width(), 0)
+        except:
+            pass
+        try:
+            self._MinimumButton.move(self.width() - (self._CloseButton.width() + 1) * 3 + 1, 0)
+        except:
+            pass
+        try:
+            self._MaximumButton.move(self.width() - (self._CloseButton.width() + 1) * 2 + 1, 0)
+        except:
+            pass
+        # 重新调整边界范围以备实现鼠标拖放缩放窗口大小，采用三个列表生成式生成三个列表
+        self._right_rect = [QPoint(x, y) for x in range(self.width() - self._padding, self.width() + 1)
+                           for y in range(1, self.height() - self._padding)]
+        self._bottom_rect = [QPoint(x, y) for x in range(1, self.width() - self._padding)
+                         for y in range(self.height() - self._padding, self.height() + 1)]
+        self._corner_rect = [QPoint(x, y) for x in range(self.width() - self._padding, self.width() + 1)
+                                    for y in range(self.height() - self._padding, self.height() + 1)]
+
+        self.resizeSignal.emit(self.label_video.size())
