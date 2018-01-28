@@ -283,11 +283,23 @@
     </property>
     <addaction name="actionOpenFile"/>
    </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>数据</string>
+    </property>
+    <addaction name="actionSpider"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <action name="actionOpenFile">
    <property name="text">
     <string>打开</string>
+   </property>
+  </action>
+  <action name="actionSpider">
+   <property name="text">
+    <string>爬取球员以及球队数据</string>
    </property>
   </action>
  </widget>

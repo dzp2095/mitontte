@@ -8,7 +8,6 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap
 from PIL import Image
 from PIL.ImageQt import ImageQt
-import time
 class videoHandleThread(QtCore.QThread):
 
     #发送处理完的一帧回界面(当前画面以及当前时间)
@@ -48,7 +47,9 @@ class videoHandleThread(QtCore.QThread):
                 #转换为QPixmap
                 frameImage=Image.fromarray(frame)
                 frameImage=frameImage.resize((self.framSize.width(),self.framSize.height()))
+
                 framePixmap = QPixmap.fromImage(ImageQt(frameImage))
+
                 #改变当前帧的大小适应窗口
                 framePixmap.scaled(self.framSize)
                 #将当前帧、帧的index、当前帧所处时间 发回界面线程

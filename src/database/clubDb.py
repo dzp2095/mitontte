@@ -1,16 +1,15 @@
 # -*- coding:utf-8 -*-
 import pymysql
-import configparser
+from src.config.readConfig import readConfig
 #球队数据
 class clubDb:
     #读取配置文件中的数据
-    cf=configparser.ConfigParser()
-    cf.read("database/mitontteConf.conf","utf-8-sig")
-    databaseName=cf.get("database","databaseName")
-    host = cf.get("database","host")
-    port = cf.getint("database","port")
-    username = cf.get("database","username")
-    password = cf.get("database","password")
+    databaseInfo=readConfig.readDatabaseConfig()
+    databaseName=databaseInfo["databaseName"]
+    host = databaseInfo["host"]
+    port = databaseInfo["port"]
+    username = databaseInfo["username"]
+    password = databaseInfo["password"]
 
     @staticmethod
     #连接数据库

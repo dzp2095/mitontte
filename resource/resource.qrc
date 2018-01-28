@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource >
+    <file alias="img/mute.png">img/mute.png</file>
+    <file alias="img/pause.png">img/pause.png</file>
+    <file alias="img/play-button.png">img/play-button.png</file>
+    <file alias="img/speaker.png">img/speaker.png</file>
+    <file alias="qss/mainwindow.qss">qss/mainwindow.qss</file>
+</qresource>
+</RCC>

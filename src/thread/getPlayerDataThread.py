@@ -1,22 +1,37 @@
 # -*- coding:utf-8 -*-
+# 读取球队信息以及球员信息，保存进数据库
 
-#读取球队信息以及球员信息，保存进数据库
-
-from pyquery import PyQuery
-import database
-import urllib
 import http.cookiejar
-class getPlayerData:
+import urllib
+from PyQt5 import QtCore
+from pyquery import PyQuery
+import src.database
+
+class getPlayerDataThread(QtCore.QThread):
+
+    finishSignal = QtCore.pyqtSignal(int)
     header = {
         "User-Agent": "Mozilla/5.0(Windows NT 6.3; Win64;x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/58.0.3029.81 Safari/537.36",
         "Content-Type": "application / x - www - form - urlencoded",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Language": "zh-CN,zh;q=0.8"
     }
-    def __init__(self):
-        return
-    @staticmethod
-    def getOpener(head):
+
+    def __init__(self, parent=None):
+        super(getPlayerDataThread, self).__init__(parent)
+
+    def run(self):
+        #初始化数据库
+        #src.database.initDB()
+        try:
+            self.queryPlayer()
+        except:
+            self.finishSignal.emit(0)
+            return
+        #标识球员信息查询完成
+        self.finishSignal.emit(1)
+
+    def getOpener(self,head):
         # 处理cookies
         cj = http.cookiejar.CookieJar()
         pro = urllib.request.HTTPCookieProcessor(cj)
@@ -27,10 +42,10 @@ class getPlayerData:
             header.append(elem)
         opener.addheaders = header
         return opener
-    @staticmethod
-    def queryPlayer():
+
+    def queryPlayer(self):
         url = "http://www.volleychina.org/team/w/"
-        opener = getPlayerData.getOpener(getPlayerData.header)
+        opener = self.getOpener(getPlayerDataThread.header)
         op = opener.open(url)
         data=op.read()
         data=PyQuery(data)
@@ -47,7 +62,7 @@ class getPlayerData:
             }
             )
             #存入数据库中
-            database.clubDb.creatTeam(team[i])
+            src.database.clubDb.creatTeam(team[i])
 
         #依次读取各个球队的队员信息
         for index in(range(len(team))):
@@ -66,7 +81,6 @@ class getPlayerData:
 
             #将取得的id号拼接为一个url
             url="http://cva.sports.sina.com.cn/api/player/getByTeamId?teamId="+str(team[index]["id"])+"&callback=drawit2&dpc=1"
-
             op=opener.open(url)
             data = op.read()
             data=data.decode("gbk")
@@ -82,5 +96,4 @@ class getPlayerData:
                 #将位置号转化为中文
                 playerDict["position"]=positionToZH(int(playerDict["position"]))
                 res.append(playerDict)
-                database.playerDb.creatPlayer(playerDict)
-                print(playerDict)
+                src.database.playerDb.creatPlayer(playerDict)

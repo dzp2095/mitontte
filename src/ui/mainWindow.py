@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from PyQt5 import QtCore
+
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QPixmap
@@ -7,8 +7,10 @@ from PyQt5.QtWidgets import QDesktopWidget
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QListWidgetItem
 from src.thread import videoHandleThread
+from src.thread.getPlayerDataThread import getPlayerDataThread
 from src.ui import ui_MainWindow
-
+from PyQt5.QtWidgets import QMessageBox
+from resource.resource import *
 
 class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
 
@@ -37,12 +39,12 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
 
      #加载qss
     def loadQSS(self):
-        """ 加载QSS """
-        file = 'src\qss\mainwindow.qss'
-        with open(file, 'rt', encoding='utf8') as f:
-            styleSheet = f.read()
-        self.setStyleSheet(styleSheet)
-        f.close()
+
+        file = QtCore.QFile(':/qss/mainwindow.qss')
+        file.open(QtCore.QFile.ReadOnly)
+        styleSheet = file.readAll()
+        #styleSheet是QByteArray，先转为bytes 再转为str
+        self.setStyleSheet(styleSheet.data().decode("utf-8"))
 
     def __center__(self):
         qr = self.frameGeometry()
@@ -55,11 +57,13 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
         self.actionOpenFile.triggered.connect(self.openFile)
         self.btn_start.clicked.connect(self.onBtnStart)
         self.horizontalSlider_progress.sliderReleased.connect(self.onVideoSliderRealeaesd)
+        self.actionSpider.triggered.connect(self.onActionSpiderTriggered)
 
     #初始化图标
     def __initIcon(self):
-        volumeImg=QPixmap("resource/img/speaker.png")
-        self.btn_start.setIcon(QIcon("resource/img/play-button.png"))
+
+        volumeImg=QPixmap(":/img/speaker.png")
+        self.btn_start.setIcon(QIcon(":/img/play-button.png"))
         self.label_volume.setPixmap(volumeImg)
 
     #打开文件
@@ -88,8 +92,9 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
             if  not self.workThreadHasStart:
                 self.workThreadHasStart=True
                 self.isWorking=True
-                self.btn_start.setIcon(QIcon("resource/img/pause.png"))
+                self.btn_start.setIcon(QIcon(":/img/pause.png"))
                 self.videoHandleThread=videoHandleThread(self.filename,self.label_video.size())
+
                 #connect
                 self.videoHandleThread.sendFrameSignal.connect(self.onReceiveFram)
                 self.videoHandleThread.currentFrameIndexSignal.connect(self.onReceiveCurrentFrameIndex)
@@ -101,18 +106,19 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
                 #滑动进度条时不再接收当前帧的信号
                 self.horizontalSlider_progress.sliderPressed.connect(self.onSliderPressed)
                 #启动处理线程
+
                 self.videoHandleThread.start()
             else:
                 #线程正在工作，发送暂停信号
                 if self.isWorking:
                     self.isWorking=False
                     self.goOnSignal.emit(False)
-                    self.btn_start.setIcon(QIcon("resource/img/play-button.png"))
+                    self.btn_start.setIcon(QIcon(":/img/play-button.png"))
                 #线程未工作，发送继续信号
                 else:
                     self.isWorking=True
                     self.goOnSignal.emit(True)
-                    self.btn_start.setIcon(QIcon("resource/img/pause.png"))
+                    self.btn_start.setIcon(QIcon(":/img/pause.png"))
     def onSliderPressed(self):
         if self.workThreadHasStart:
             self.videoHandleThread.currentFrameIndexSignal.disconnect(self.onReceiveCurrentFrameIndex)
@@ -141,3 +147,18 @@ class mainWindow(QtWidgets.QMainWindow, ui_MainWindow.Ui_MainWindow):
         if self.workThreadHasStart:
             self.videoHandleThread.currentFrameIndexSignal.connect(self.onReceiveCurrentFrameIndex)
             self.currentFrameChangeSignal.emit(self.horizontalSlider_progress.value())
+
+    #爬取球员数据
+    def onActionSpiderTriggered(self):
+        #新建爬取球员数据线程
+        self.queryThread=getPlayerDataThread()
+        self.queryThread.finishSignal.connect(self.finishSpider)
+        self.queryThread.start()
+        QMessageBox.information(self, "wait", "爬虫开始工作，请耐心等待\n大约需要10秒")
+
+    #爬虫线程工作结束
+    def finishSpider(self,finishTag):
+        if finishTag==0:
+            QMessageBox.information(self,"error", "网络错误")
+        if finishTag==1:
+            QMessageBox.information(self,"ok", "爬虫工作完成")
