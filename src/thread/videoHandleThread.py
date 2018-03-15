@@ -33,7 +33,7 @@ class videoHandleThread(QtCore.QThread):
         fps=self.cap.get(cv2.CAP_PROP_FPS)
         videoTotalTime = self.mescToStr(framCount/fps)
         self.senVideoProp.emit(framCount,videoTotalTime)
-
+        index = 0
         while (self.cap.isOpened()and not self.haveGetQuitSignal):
             if self.goOn:
                 #是否收到改变当前帧的信号
@@ -41,6 +41,9 @@ class videoHandleThread(QtCore.QThread):
                     self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.framToChange)
                     self.framToChange=-1
                 ret, frame = self.cap.read()
+                cv2.imwrite("trainingFrame" + str(index) + ".jpg", frame)
+                index += 1
+
                 currentFrameIndex=int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
                 #注意：显示的时间不是正常播放的时间
                 currentTime=self.mescToStr(currentFrameIndex/fps)
@@ -48,7 +51,6 @@ class videoHandleThread(QtCore.QThread):
                 #转换为QPixmap
                 frameImage=Image.fromarray(frame)
                 frameImage=frameImage.resize((self.framSize.width(),self.framSize.height()))
-
                 framePixmap = QPixmap.fromImage(ImageQt(frameImage))
 
                 #改变当前帧的大小适应窗口
@@ -56,6 +58,8 @@ class videoHandleThread(QtCore.QThread):
                 #将当前帧、帧的index、当前帧所处时间 发回界面线程
                 self.sendFrameSignal.emit(framePixmap,currentTime)
                 self.currentFrameIndexSignal.emit(currentFrameIndex)
+
+
                 if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
                     break
 

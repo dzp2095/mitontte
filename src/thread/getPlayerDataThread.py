@@ -22,7 +22,7 @@ class getPlayerDataThread(QtCore.QThread):
 
     def run(self):
         #初始化数据库
-        #src.database.initDB()
+        src.database.initDB()
         try:
             self.queryPlayer()
         except:

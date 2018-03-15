@@ -34,7 +34,6 @@ class edgeDetect:
     #sobel算法
     @staticmethod
     def sobelDetect(frame):
-
         cap = cv2.VideoCapture('test.avi')
         index = 0
         while (cap.isOpened()):
@@ -54,6 +53,10 @@ class edgeDetect:
                 break
         cap.release()
         cv2.destroyAllWindows()
+
+    @staticmethod
+    def houghTransform():
+        pass
 
 
 

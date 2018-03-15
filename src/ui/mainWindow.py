@@ -12,8 +12,8 @@ from src.ui import ui_MainWindow
 from src.ui import framlessWindow
 from PyQt5.QtWidgets import QMessageBox
 from resource.resource import *
-from PyQt5.QtCore import Qt
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import  QPoint
+
 class mainWindow(QtWidgets.QMainWindow,framlessWindow.QUnFrameWindow, ui_MainWindow.Ui_MainWindow):
 
     resizeSignal = QtCore.pyqtSignal(QtCore.QSize)
@@ -39,12 +39,12 @@ class mainWindow(QtWidgets.QMainWindow,framlessWindow.QUnFrameWindow, ui_MainWin
         #标识工作线程是否正在运行
         self.isWorking = False
 
+        #实现无边框窗体
         self._padding = 5  # 设置边界宽度为5
         self.initLayout() # 设置框架布局
         self.initTitleLabel()  # 安放标题栏标签
         self.setWindowTitle = self._setTitleText(self.setWindowTitle) # 用装饰器将设置WindowTitle名字函数共享到标题栏标签上
         self.setWindowTitle("mitontte")
-
         self.setMouseTracking(True) # 设置widget鼠标跟踪
         self.initDrag() # 设置鼠标跟踪判断默认值
         self.loadQSS()
@@ -143,8 +143,6 @@ class mainWindow(QtWidgets.QMainWindow,framlessWindow.QUnFrameWindow, ui_MainWin
     def onReceiveFram(self,frame,currentTime):
         self.label_rest_time.setText(currentTime+"/"+self.videoTotalTime)
         self.label_video.setPixmap(frame)
-
-
 
     #得到总帧数
     def onGetFrameCount(self,framCount,videoTotalTime):
